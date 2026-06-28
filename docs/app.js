@@ -1,4 +1,4 @@
-// Simple Todo Web App
+// Todo Web App with task completion tracking
 document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('taskInput');
     const addButton = document.getElementById('addButton');
@@ -12,14 +12,28 @@ document.addEventListener('DOMContentLoaded', () => {
         taskList.innerHTML = '';
         tasks.forEach((task, index) => {
             const li = document.createElement('li');
-            li.textContent = task;
+            li.textContent = task.text;
             li.dataset.index = index;
+
+            // Apply strikethrough if task is done
+            if (task.done) {
+                li.style.textDecoration = 'line-through';
+                li.style.color = '#888';
+            }
+
+            // Toggle completion on click
+            li.style.cursor = 'pointer';
+            li.addEventListener('click', () => {
+                toggleTaskDone(index);
+            });
 
             // Create delete button
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'delete-btn';
             deleteBtn.dataset.index = index;
-            deleteBtn.addEventListener('click', () => {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent triggering li click
                 deleteTask(index);
             });
 
@@ -30,13 +44,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add new task
     function addTask() {
-        const task = taskInput.value.trim();
-        if (task) {
-            tasks.push(task);
+        const text = taskInput.value.trim();
+        if (text) {
+            tasks.push({ text: text, done: false });
             localStorage.setItem('tasks', JSON.stringify(tasks));
             taskInput.value = '';
             renderTasks();
         }
+    }
+
+    // Toggle task completion
+    function toggleTaskDone(index) {
+        tasks[index].done = !tasks[index].done;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        renderTasks();
     }
 
     // Delete task
